@@ -8,7 +8,11 @@ export default defineConfig(({ mode }) => ({
 	server: {
 		allowedHosts: ["localhost", ".tunnelmole.net"],
 		host: "::",
-		port: 8080,
+		port: 8081,
+		hmr: {
+			clientPort: 443,
+			protocol: "wss",
+		},
 	},
 	plugins: [react(), mode === "development" && componentTagger()].filter(
 		Boolean,
