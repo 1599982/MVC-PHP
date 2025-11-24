@@ -52,6 +52,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
 
   const [formData, setFormData] = useState({
     dni: "",
+    nombre: "",
     party: "",
     description: "",
     image: "",
@@ -66,7 +67,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
         setLoadingCandidates(true);
         const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
         const response = await fetch(
-          `http://161.132.54.35:3000/api/candidates/role/${roleType}`
+          `https://161.132.54.35:3000/api/candidates/role/${roleType}`
         );
 
         if (!response.ok) {
@@ -98,13 +99,14 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
       setEditingCandidate(candidate);
       setFormData({
         dni: candidate.dni,
+        nombre: candidate.nombre,
         party: candidate.politicalParty,
         description: candidate.description,
         image: candidate.imageUri,
       });
     } else {
       setEditingCandidate(null);
-      setFormData({ dni: "", party: "", description: "", image: "" });
+      setFormData({ dni: "", nombre: "", party: "", description: "", image: "" });
     }
     setDialogOpen(true);
   };
@@ -112,7 +114,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setEditingCandidate(null);
-    setFormData({ dni: "", party: "", description: "", image: "" });
+    setFormData({ dni: "", nombre: "", party: "", description: "", image: "" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,7 +127,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
         const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
 
         const response = await fetch(
-          `http://161.132.54.35:3000/api/candidates/${formData.dni}`,
+          `https://161.132.54.35:3000/api/candidates/${formData.dni}`,
           {
             method: "PUT",
             headers: {
@@ -169,18 +171,42 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
         // Agregar nuevo candidato usando la API
         const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
 
-        const response = await fetch("http://161.132.54.35:3000/api/candidates", {
+        // Validar que al menos uno de los campos esté presente
+        const hasDni = formData.dni.trim().length > 0;
+        const hasNombre = formData.nombre.trim().length > 0;
+
+        if (!hasDni && !hasNombre) {
+          throw new Error("Debe proporcionar al menos un DNI o un Nombre");
+        }
+
+        // Preparar el body según la lógica de la API
+        const requestBody: any = {
+          politicalParty: formData.party,
+          description: formData.description,
+          imageUri: formData.image,
+          roleType: roleType,
+        };
+
+        // Caso 1: Solo DNI (nombre se obtiene de Migo API)
+        if (hasDni && !hasNombre) {
+          requestBody.dni = formData.dni;
+        }
+        // Caso 2: Solo Nombre (DNI se genera automáticamente)
+        else if (!hasDni && hasNombre) {
+          requestBody.name = formData.nombre;
+        }
+        // Caso 3: Ambos DNI y Nombre (usa DNI proporcionado con nombre personalizado)
+        else if (hasDni && hasNombre) {
+          requestBody.dni = formData.dni;
+          requestBody.name = formData.nombre;
+        }
+
+        const response = await fetch("https://161.132.54.35:3000/api/candidates", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            dni: formData.dni,
-            politicalParty: formData.party,
-            description: formData.description,
-            imageUri: formData.image,
-            roleType: roleType,
-          }),
+          body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
@@ -226,7 +252,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
       const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
 
       const response = await fetch(
-        `http://161.132.54.35:3000/api/candidates/${disablingCandidateId}`,
+        `https://161.132.54.35:3000/api/candidates/${disablingCandidateId}`,
         {
           method: "PUT",
           headers: {
@@ -426,7 +452,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">
-                DNI
+                DNI {!editingCandidate && <span className="text-muted-foreground">(opcional)</span>}
               </label>
               <Input
                 value={formData.dni}
@@ -434,18 +460,40 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
                   setFormData({ ...formData, dni: e.target.value })
                 }
                 placeholder="Ej: 12345678"
-                required
+                required={!!editingCandidate}
                 disabled={!!editingCandidate}
                 type="text"
                 pattern="[0-9]{8,10}"
                 title="El DNI debe tener entre 8 y 10 dígitos"
               />
-              {editingCandidate && (
+              {editingCandidate ? (
                 <p className="text-xs text-muted-foreground mt-1">
                   El DNI no se puede modificar
                 </p>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Si proporciona DNI, el nombre se obtendrá automáticamente de Migo API
+                </p>
               )}
             </div>
+            {!editingCandidate && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Nombre <span className="text-muted-foreground">(opcional)</span>
+                </label>
+                <Input
+                  value={formData.nombre}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nombre: e.target.value })
+                  }
+                  placeholder="Ej: Juan Carlos Pérez García"
+                  type="text"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Si no proporciona DNI, debe ingresar el nombre manualmente
+                </p>
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium mb-2">Partido</label>
               <Input

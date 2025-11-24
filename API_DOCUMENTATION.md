@@ -1,6 +1,6 @@
 # API Documentation - Sistema de Votación
 
-Base URL: `http://161.132.54.35:3000`
+Base URL: `http://localhost:3000`
 
 ## Tabla de Contenidos
 - [Person Endpoints](#person-endpoints)
@@ -65,7 +65,7 @@ Crea un nuevo candidato en el sistema. Si el DNI no existe en la tabla Person, s
 
 **Endpoint:** `POST /api/candidates`
 
-**Request Body:**
+**Request Body - Ejemplo 1 (Con DNI real):**
 ```json
 {
   "dni": "87654321",
@@ -76,15 +76,73 @@ Crea un nuevo candidato en el sistema. Si el DNI no existe en la tabla Person, s
 }
 ```
 
+**Request Body - Ejemplo 2 (Solo con nombre, sin DNI):**
+```json
+{
+  "name": "Juan Carlos Pérez García",
+  "politicalParty": "Partido Democrático",
+  "description": "Candidato con experiencia en gestión pública",
+  "imageUri": "https://example.com/image.jpg",
+  "roleType": "PRESIDENT"
+}
+```
+
+**Request Body - Ejemplo 3 (Con DNI y nombre personalizado):**
+```json
+{
+  "dni": "87654321",
+  "name": "Juan Carlos Pérez García",
+  "politicalParty": "Partido Democrático",
+  "description": "Candidato con experiencia en gestión pública",
+  "imageUri": "https://example.com/image.jpg",
+  "roleType": "PRESIDENT"
+}
+```
+
+**Campos del request:**
+- `dni` (opcional): DNI del candidato. Si no se proporciona, se generará automáticamente
+- `name` (opcional): Nombre personalizado del candidato
+- `politicalParty` (requerido): Partido político
+- `description` (requerido): Descripción del candidato
+- `imageUri` (requerido): URL de la imagen del candidato
+- `roleType` (requerido): Tipo de cargo
+
+**Lógica de DNI y Nombre:**
+
+| Caso | DNI proporcionado | Name proporcionado | Resultado |
+|------|-------------------|-------------------|-----------|
+| 1 | ✅ Sí | ❌ No | Usa el DNI, obtiene nombre de Migo API |
+| 2 | ❌ No | ✅ Sí | Genera DNI automático (CAND-xxx), usa el nombre proporcionado |
+| 3 | ✅ Sí | ✅ Sí | Usa el DNI proporcionado y el nombre personalizado |
+| 4 | ❌ No | ❌ No | ⚠️ Error: Debe proporcionar al menos DNI o name |
+
+**Formato de DNI generado automáticamente:** `CAND-{timestamp}-{random}`
+- Ejemplo: `CAND-1732456789123-456`
+
 **Valores válidos para `roleType`:**
 - `PRESIDENT` - Presidente
 - `MAYOR` - Alcalde
 
-**Response (201 Created):**
+**Response (201 Created) - Con DNI real:**
 ```json
 {
   "dni": "87654321",
   "nombre": "PEREZ GARCIA JUAN CARLOS",
+  "politicalParty": "Partido Democrático",
+  "description": "Candidato con experiencia en gestión pública",
+  "imageUri": "https://example.com/image.jpg",
+  "roleType": "PRESIDENT",
+  "votes": 0,
+  "enabled": true,
+  "message": "Candidate created successfully"
+}
+```
+
+**Response (201 Created) - Solo con nombre (DNI generado automáticamente):**
+```json
+{
+  "dni": "CAND-1732456789123-456",
+  "nombre": "Juan Carlos Pérez García",
   "politicalParty": "Partido Democrático",
   "description": "Candidato con experiencia en gestión pública",
   "imageUri": "https://example.com/image.jpg",
@@ -113,6 +171,7 @@ Actualiza la información de un candidato existente (excepto el DNI y los votos)
 **Request Body (todos los campos son opcionales):**
 ```json
 {
+  "name": "Juan Carlos Pérez García (Actualizado)",
   "politicalParty": "Nuevo Partido",
   "description": "Nueva descripción actualizada",
   "imageUri": "https://example.com/new-image.jpg",
@@ -120,6 +179,16 @@ Actualiza la información de un candidato existente (excepto el DNI y los votos)
   "enabled": false
 }
 ```
+
+**Campos opcionales:**
+- `name`: Actualizar el nombre personalizado del candidato. Si se proporciona, reemplazará el nombre de Migo API
+- `politicalParty`: Actualizar el partido político
+- `description`: Actualizar la descripción
+- `imageUri`: Actualizar la URL de la imagen
+- `roleType`: Cambiar el tipo de cargo
+- `enabled`: Habilitar (true) o deshabilitar (false) el candidato
+
+**Nota sobre el nombre:** Si actualiza el campo `name`, todas las respuestas futuras usarán este nombre en lugar del obtenido de Migo API.
 
 **Response (200 OK):**
 ```json
@@ -136,7 +205,12 @@ Actualiza la información de un candidato existente (excepto el DNI y los votos)
 }
 ```
 
-**Nota:** El campo `enabled` permite habilitar (`true`) o deshabilitar (`false`) un candidato. Los candidatos deshabilitados permanecen en el sistema pero pueden ser filtrados en el frontend.
+**Notas importantes:**
+- El campo `enabled` permite habilitar (`true`) o deshabilitar (`false`) un candidato. Los candidatos deshabilitados permanecen en el sistema pero pueden ser filtrados en el frontend.
+- **Lógica del campo `name`:**
+  - Si se proporciona un `name` personalizado, este se guardará en la base de datos y se usará en todas las respuestas
+  - Si NO se proporciona `name`, el sistema consultará automáticamente Migo API usando el DNI para obtener el nombre
+  - Esto permite crear candidatos sin DNI real usando solo el campo `name`
 
 **Response Error (404 Not Found):**
 ```json
@@ -510,6 +584,16 @@ Verifica la existencia y credenciales de un administrador en el sistema.
 ### Integración con Migo API
 
 Todos los endpoints que retornan información de personas incluyen el campo `nombre`, el cual se obtiene automáticamente desde la API de Migo usando el DNI. Si la API de Migo no está disponible o falla, el campo `nombre` será `null`.
+
+**Para candidatos - Lógica de nombres:**
+1. **Si el candidato tiene un `name` guardado:** Se usa ese nombre en todas las respuestas
+2. **Si el candidato NO tiene `name`:** Se consulta Migo API con el DNI para obtener el nombre
+3. **Ventaja:** Permite crear candidatos ficticios o sin DNI real usando solo el campo `name`
+
+**Ejemplos:**
+- Candidato con solo `name` = "Juan Pérez" → DNI generado: `"CAND-1732456789123-456"`, Respuesta: `"nombre": "Juan Pérez"`
+- Candidato con `dni` = "43451826" (sin name) → Respuesta: `"nombre": "CASTILLO GOMES VANESSA SILVIA"` (de Migo API)
+- Candidato con ambos → Respuesta: usa el `name` proporcionado con el DNI especificado
 
 ### CORS
 
