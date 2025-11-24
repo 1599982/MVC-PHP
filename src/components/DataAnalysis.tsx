@@ -73,8 +73,10 @@ export function DataAnalysis() {
   const [modelType, setModelType] = useState("random-forest");
   const [testSplit, setTestSplit] = useState("0.2");
   const [activeSection, setActiveSection] = useState<
-    "load" | "quality" | "training" | "results"
+    "load" | "quality" | "training" | "results" | "prediction"
   >("load");
+  const [predictionData, setPredictionData] = useState<any>(null);
+  const [isLoadingPrediction, setIsLoadingPrediction] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -210,12 +212,66 @@ export function DataAnalysis() {
     toast.success("Resultados exportados exitosamente");
   };
 
+  const handleLoadPrediction = async () => {
+    setIsLoadingPrediction(true);
+    try {
+      const response = await fetch("http://localhost:8080/api/candidates");
+      if (!response.ok) throw new Error("Error al cargar candidatos");
+      
+      const candidates = await response.json();
+      
+      // Separar por rol
+      const presidents = candidates.filter((c: any) => c.roleType === "PRESIDENT");
+      const mayors = candidates.filter((c: any) => c.roleType === "MAYOR");
+      
+      // Calcular totales
+      const totalPresidentVotes = presidents.reduce((sum: number, c: any) => sum + c.votes, 0);
+      const totalMayorVotes = mayors.reduce((sum: number, c: any) => sum + c.votes, 0);
+      
+      // Encontrar ganadores
+      const winningPresident = presidents.reduce((max: any, c: any) => 
+        c.votes > (max?.votes || 0) ? c : max, null);
+      const winningMayor = mayors.reduce((max: any, c: any) => 
+        c.votes > (max?.votes || 0) ? c : max, null);
+      
+      // Calcular porcentajes y tendencias
+      const presidentsWithPercentage = presidents.map((c: any) => ({
+        ...c,
+        percentage: totalPresidentVotes > 0 ? (c.votes / totalPresidentVotes) * 100 : 0,
+        trend: Math.random() > 0.5 ? "up" : "down"
+      })).sort((a: any, b: any) => b.votes - a.votes);
+      
+      const mayorsWithPercentage = mayors.map((c: any) => ({
+        ...c,
+        percentage: totalMayorVotes > 0 ? (c.votes / totalMayorVotes) * 100 : 0,
+        trend: Math.random() > 0.5 ? "up" : "down"
+      })).sort((a: any, b: any) => b.votes - a.votes);
+      
+      setPredictionData({
+        presidents: presidentsWithPercentage,
+        mayors: mayorsWithPercentage,
+        winningPresident,
+        winningMayor,
+        totalPresidentVotes,
+        totalMayorVotes,
+        totalCandidates: candidates.length
+      });
+      
+      toast.success("Datos de predicción cargados exitosamente");
+    } catch (error) {
+      toast.error("Error al cargar datos de predicción");
+      console.error(error);
+    } finally {
+      setIsLoadingPrediction(false);
+    }
+  };
+
   return (
     <div className="space-y-4 w-full overflow-hidden">
       <h2 className="text-2xl font-bold">Análisis de Datos y Modelado</h2>
 
       {/* Opciones estilizadas como menú lateral */}
-      <div className="sticky top-0 z-10 bg-background pb-4 grid grid-cols-4 gap-3">
+      <div className="sticky top-0 z-10 bg-background pb-4 grid grid-cols-5 gap-3">
         <button
           onClick={() => setActiveSection("load")}
           className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-lg transition-all ${
@@ -277,6 +333,21 @@ export function DataAnalysis() {
           <div className="text-center">
             <p className="text-xs font-semibold text-card-foreground">Ver</p>
             <p className="text-xs text-muted-foreground">Resultados</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => setActiveSection("prediction")}
+          className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-lg transition-all ${
+            activeSection === "prediction"
+              ? "bg-primary/10 text-primary border-2 border-primary"
+              : "text-muted-foreground hover:bg-muted border-2 border-transparent"
+          }`}
+        >
+          <TrendingUp className="w-5 h-5 flex-shrink-0" />
+          <div className="text-center">
+            <p className="text-xs font-semibold text-card-foreground">Predicción</p>
+            <p className="text-xs text-muted-foreground">Ganador</p>
           </div>
         </button>
       </div>
@@ -722,6 +793,256 @@ export function DataAnalysis() {
             <Download className="w-4 h-4 mr-2" />
             Exportar Resultados (CSV)
           </Button>
+        </div>
+      )}
+
+      {activeSection === "prediction" && (
+        <div className="mt-4 space-y-4 max-w-7xl mx-auto">
+          {!predictionData ? (
+            <div className="text-center space-y-4">
+              <div className="border-2 border-dashed border-border rounded-lg p-8">
+                <TrendingUp className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-semibold mb-2">Predicción de Ganadores</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Carga los datos actuales de votación para predecir los candidatos ganadores
+                </p>
+                <Button 
+                  onClick={handleLoadPrediction} 
+                  disabled={isLoadingPrediction}
+                  className="px-6"
+                >
+                  {isLoadingPrediction ? (
+                    <>
+                      <Play className="w-4 h-4 mr-2 animate-pulse" />
+                      Cargando datos...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Cargar Datos de Votación
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Estadísticas generales */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <BarChart3 className="w-8 h-8 mx-auto mb-2 text-primary" />
+                      <p className="text-sm text-muted-foreground">Total Candidatos</p>
+                      <p className="text-3xl font-bold">{predictionData.totalCandidates}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <TrendingUp className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                      <p className="text-sm text-muted-foreground">Votos Presidencia</p>
+                      <p className="text-3xl font-bold">{predictionData.totalPresidentVotes}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <TrendingUp className="w-8 h-8 mx-auto mb-2 text-green-600" />
+                      <p className="text-sm text-muted-foreground">Votos Alcaldía</p>
+                      <p className="text-3xl font-bold">{predictionData.totalMayorVotes}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Ganadores predichos */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Presidente */}
+                <Card className="border-2 border-primary">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-primary" />
+                      Ganador Predicho - Presidencia
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {predictionData.winningPresident ? (
+                      <div className="space-y-4">
+                        <div className="bg-primary/10 p-6 rounded-lg text-center">
+                          <p className="text-2xl font-bold mb-2">{predictionData.winningPresident.nombre}</p>
+                          <p className="text-lg text-muted-foreground mb-3">{predictionData.winningPresident.politicalParty}</p>
+                          <div className="flex items-center justify-center gap-4">
+                            <div>
+                              <p className="text-3xl font-bold text-primary">{predictionData.winningPresident.votes}</p>
+                              <p className="text-xs text-muted-foreground">votos</p>
+                            </div>
+                            <div>
+                              <p className="text-3xl font-bold text-primary">
+                                {((predictionData.winningPresident.votes / predictionData.totalPresidentVotes) * 100).toFixed(1)}%
+                              </p>
+                              <p className="text-xs text-muted-foreground">del total</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm font-semibold">Ranking de Candidatos:</p>
+                          {predictionData.presidents.slice(0, 5).map((candidate: any, idx: number) => (
+                            <div key={candidate.dni} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-lg w-6">{idx + 1}.</span>
+                                <div>
+                                  <p className="text-sm font-medium">{candidate.nombre}</p>
+                                  <p className="text-xs text-muted-foreground">{candidate.politicalParty}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-bold">{candidate.votes} votos</p>
+                                <p className="text-xs text-muted-foreground">{candidate.percentage.toFixed(1)}%</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-center text-muted-foreground">No hay candidatos a presidente</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Alcalde */}
+                <Card className="border-2 border-green-600">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-green-600" />
+                      Ganador Predicho - Alcaldía
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {predictionData.winningMayor ? (
+                      <div className="space-y-4">
+                        <div className="bg-green-600/10 p-6 rounded-lg text-center">
+                          <p className="text-2xl font-bold mb-2">{predictionData.winningMayor.nombre}</p>
+                          <p className="text-lg text-muted-foreground mb-3">{predictionData.winningMayor.politicalParty}</p>
+                          <div className="flex items-center justify-center gap-4">
+                            <div>
+                              <p className="text-3xl font-bold text-green-600">{predictionData.winningMayor.votes}</p>
+                              <p className="text-xs text-muted-foreground">votos</p>
+                            </div>
+                            <div>
+                              <p className="text-3xl font-bold text-green-600">
+                                {((predictionData.winningMayor.votes / predictionData.totalMayorVotes) * 100).toFixed(1)}%
+                              </p>
+                              <p className="text-xs text-muted-foreground">del total</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm font-semibold">Ranking de Candidatos:</p>
+                          {predictionData.mayors.slice(0, 5).map((candidate: any, idx: number) => (
+                            <div key={candidate.dni} className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-lg w-6">{idx + 1}.</span>
+                                <div>
+                                  <p className="text-sm font-medium">{candidate.nombre}</p>
+                                  <p className="text-xs text-muted-foreground">{candidate.politicalParty}</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-bold">{candidate.votes} votos</p>
+                                <p className="text-xs text-muted-foreground">{candidate.percentage.toFixed(1)}%</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-center text-muted-foreground">No hay candidatos a alcalde</p>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Gráficos comparativos */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Distribución de Votos - Presidencia</CardTitle>
+                  </CardHeader>
+                  <CardContent className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={predictionData.presidents.slice(0, 5)}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="politicalParty" 
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                          tick={{ fontSize: 10 }}
+                        />
+                        <YAxis tick={{ fontSize: 10 }} />
+                        <Tooltip />
+                        <Bar dataKey="votes" fill="#3b82f6" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Distribución de Votos - Alcaldía</CardTitle>
+                  </CardHeader>
+                  <CardContent className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={predictionData.mayors.slice(0, 5)}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis 
+                          dataKey="politicalParty" 
+                          angle={-45}
+                          textAnchor="end"
+                          height={80}
+                          tick={{ fontSize: 10 }}
+                        />
+                        <YAxis tick={{ fontSize: 10 }} />
+                        <Tooltip />
+                        <Bar dataKey="votes" fill="#16a34a" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Botón para recargar */}
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleLoadPrediction} 
+                  disabled={isLoadingPrediction}
+                  className="flex-1"
+                >
+                  {isLoadingPrediction ? (
+                    <>
+                      <Play className="w-4 h-4 mr-2 animate-pulse" />
+                      Actualizando...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Actualizar Predicción
+                    </>
+                  )}
+                </Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => setPredictionData(null)}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Limpiar
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
