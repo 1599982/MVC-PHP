@@ -1,4 +1,4 @@
-import { Users, MapPin, BarChart3, MessageSquare, LogOut } from "lucide-react";
+import { Users, MapPin, BarChart3, MessageSquare, LogOut, X } from "lucide-react";
 
 type Section =
   | "presidentes"
@@ -11,12 +11,16 @@ interface AdminSideMenuProps {
   activeSection: Section;
   onSectionChange: (section: Section) => void;
   onLogout: () => void;
+  isMobileMenuOpen: boolean;
+  onCloseMobileMenu: () => void;
 }
 
 export default function AdminSideMenu({
   activeSection,
   onSectionChange,
   onLogout,
+  isMobileMenuOpen,
+  onCloseMobileMenu,
 }: AdminSideMenuProps) {
   const menuItems = [
     {
@@ -52,21 +56,42 @@ export default function AdminSideMenu({
   ];
 
   return (
-    <div className="hidden md:flex md:fixed md:left-0 md:top-0 md:bottom-0 md:w-64 md:flex-col md:bg-card md:border-r md:border-border md:z-40">
-      {/* Header ADMIN */}
-      <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-            <span className="text-xl font-bold text-primary">A</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-card-foreground truncate">
-              Administrador
-            </p>
-            <p className="text-xs text-muted-foreground">Panel de control</p>
+    <>
+      {/* Overlay para móvil */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={onCloseMobileMenu}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`fixed left-0 top-0 bottom-0 w-64 flex-col bg-card border-r border-border z-50 transition-transform duration-300 ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 md:flex md:z-40`}
+      >
+        {/* Header ADMIN */}
+        <div className="p-6 border-b border-border">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+              <span className="text-xl font-bold text-primary">A</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-card-foreground truncate">
+                Administrador
+              </p>
+              <p className="text-xs text-muted-foreground">Panel de control</p>
+            </div>
+            <button
+              onClick={onCloseMobileMenu}
+              className="md:hidden p-1 hover:bg-muted rounded-lg transition-colors"
+              aria-label="Cerrar menú"
+            >
+              <X className="w-5 h-5 text-muted-foreground" />
+            </button>
           </div>
         </div>
-      </div>
 
       {/* Separador */}
       <div className="h-px bg-border" />
@@ -118,6 +143,7 @@ export default function AdminSideMenu({
           <span className="text-sm font-medium">Cerrar sesión</span>
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

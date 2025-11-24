@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Vote } from "lucide-react";
+import { Vote, Menu } from "lucide-react";
 import { useApp } from "@/contexts/AppContext";
 import { CandidateManagement } from "@/components/CandidateManagement";
 import { AdminResults } from "@/components/AdminResults";
@@ -16,6 +16,7 @@ export default function AdminDashboard() {
   const [activeSection, setActiveSection] = useState<
     "presidentes" | "alcaldes" | "resultados" | "analisis" | "comentarios"
   >("presidentes");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!adminSession) {
@@ -34,14 +35,26 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background flex">
       <AdminSideMenu
         activeSection={activeSection}
-        onSectionChange={setActiveSection}
+        onSectionChange={(section) => {
+          setActiveSection(section);
+          setIsMobileMenuOpen(false);
+        }}
         onLogout={handleLogout}
+        isMobileMenuOpen={isMobileMenuOpen}
+        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
       />
 
       <div className="flex-1 md:ml-64 flex flex-col">
         <header className="bg-card border-b border-border sticky top-0 z-40 shadow-sm">
           <div className="px-4 md:px-8 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+                aria-label="Abrir menú"
+              >
+                <Menu className="w-6 h-6 text-card-foreground" />
+              </button>
               <Vote className="w-8 h-8 text-primary" />
               <div>
                 <h1 className="text-xl font-bold text-card-foreground">

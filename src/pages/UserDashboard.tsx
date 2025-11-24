@@ -10,6 +10,7 @@ import {
   FileText,
   Download,
   AlertTriangle,
+  Menu,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
@@ -38,6 +39,7 @@ export default function UserDashboard() {
   const [showVotingWarning, setShowVotingWarning] = useState(false);
   const [missingVotes, setMissingVotes] = useState<string[]>([]);
   const [hasRedirected, setHasRedirected] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Modal comentarios
   const [showCommentModal, setShowCommentModal] = useState(false);
@@ -153,6 +155,8 @@ export default function UserDashboard() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onLogout={handleLogoutAttempt}
+        isMobileMenuOpen={isMobileMenuOpen}
+        onCloseMobileMenu={() => setIsMobileMenuOpen(false)}
       />
 
       {/* Contenido principal */}
@@ -160,6 +164,13 @@ export default function UserDashboard() {
         <header className="bg-card border-b border-border sticky top-0 z-40 shadow-sm">
           <div className="px-4 md:px-8 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsMobileMenuOpen(true)}
+                className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+                aria-label="Abrir menú"
+              >
+                <Menu className="w-6 h-6 text-card-foreground" />
+              </button>
               <Vote className="w-8 h-8 text-primary" />
               <div>
                 <h1 className="text-xl font-bold text-card-foreground">
