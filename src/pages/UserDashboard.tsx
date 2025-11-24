@@ -233,7 +233,7 @@ export default function UserDashboard() {
           </p>
 
           <h3 className="text-2xl font-bold text-primary mb-4">
-            Conoce más sobre el proceso electoral 2026
+            ¿Cómo funcionan las elecciones presidenciales en el Perú?
           </h3>
 
           <p className="text-muted-foreground mb-4">
