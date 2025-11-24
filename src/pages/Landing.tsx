@@ -40,7 +40,7 @@ export default function Landing() {
             <div className="flex items-center gap-3">
            		<img className="filter [filter:invert(27%)_sepia(99%)_saturate(2069%)_hue-rotate(215deg)_brightness(94%)_contrast(97%)] w-12 h-12 text-primary" src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F1456%2F1456042.png&f=1&nofb=1&ipt=95c7d73991294edcab213d5c9114bed9df1fbb5962e36b8193eab685c40f91fd" alt="" />
               <h1 className="text-4xl md:text-5xl font-bold text-foreground">
-                Elecciones 2025
+                Elecciones 2026
               </h1>
             </div>
             <div>
