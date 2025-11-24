@@ -291,22 +291,15 @@ export default function UserDashboard() {
           Datos claves sobre las Elecciones Generales 2026
         </h4>
 
-        {/* VIDEO MOCKUP */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg overflow-hidden mb-4 aspect-video flex items-center justify-center relative group">
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-all">
-            <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center cursor-pointer group-hover:scale-110 transition-transform">
-              <div className="w-0 h-0 border-l-8 border-l-white border-t-5 border-t-transparent border-b-5 border-b-transparent ml-1" />
-            </div>
-          </div>
-
-          <p className="text-white text-center text-sm absolute top-4 left-4 right-4">
-            Datos claves sobre las Elecciones Generales 2026
-          </p>
-        </div>
-
-        <div className="bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold w-fit cursor-pointer">
-          <span>▶</span>
-          <span>Ver en línea</span>
+        {/* VIDEO DE YOUTUBE */}
+        <div className="rounded-lg overflow-hidden mb-4 aspect-video">
+          <iframe 
+            className="w-full h-full"
+            src="https://www.youtube.com/embed/4ubKLPBpDXQ"
+            title="Datos claves sobre las Elecciones Generales 2026"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
         </div>
       </motion.div>
 

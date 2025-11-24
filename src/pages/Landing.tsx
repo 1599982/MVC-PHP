@@ -1,28 +1,34 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Vote, UserCircle, Shield, BarChart3, Database, CheckCircle2, SwitchCamera } from "lucide-react";
+import { UserCircle, Shield, BarChart3, Database, CheckCircle2, SwitchCamera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DniModal } from "@/components/DniModal";
 import { AdminAuthModal } from "@/components/AdminAuthModal";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Card } from "@/components/ui/card"
+import { Card } from "@/components/ui/card";
+import { useTheme } from "@/contexts/ThemeContext";
 
 export default function Landing() {
   const [dniModalOpen, setDniModalOpen] = useState(false);
   const [adminModalOpen, setAdminModalOpen] = useState(false);
-  const navigate = useNavigate();
- 	const [showFirst, setShowFirst] = useState(true);
+  const [showFirst, setShowFirst] = useState(true);
+  const { theme } = useTheme();
 
   return (
     <div
-      className="min-h-screen relative bg-cover bg-center"
+      className="min-h-screen relative bg-cover bg-center transition-colors duration-300"
       style={{
-        backgroundColor: `#2E3842`,
+        backgroundColor: theme === "dark" ? "#1a1f2e" : "#e8f0f7",
         backgroundAttachment: 'fixed',
       }}
     >
-      <div className="absolute inset-0 bg-black/50" aria-hidden="true" />
+      <div 
+        className="absolute inset-0 transition-colors duration-300" 
+        style={{
+          backgroundColor: theme === "dark" ? "rgba(0, 0, 0, 0.6)" : "rgba(0, 0, 0, 0.3)"
+        }}
+        aria-hidden="true" 
+      />
       <div className="relative z-10 container mx-auto px-4 py-8">
         {/* Header */}
         <motion.header
