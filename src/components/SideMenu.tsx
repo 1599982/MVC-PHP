@@ -32,7 +32,7 @@ export default function SideMenu({
 
       try {
         const response = await fetch(
-          "http://localhost:8080/api/persons/register",
+          "http://161.132.54.35:3000/api/persons/register",
           {
             method: "POST",
             headers: {
