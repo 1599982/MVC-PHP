@@ -67,7 +67,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
         setLoadingCandidates(true);
         const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
         const response = await fetch(
-          `https://161.132.54.35:3000/api/candidates/role/${roleType}`
+          `http://161.132.54.35:3000/api/candidates/role/${roleType}`
         );
 
         if (!response.ok) {
@@ -127,7 +127,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
         const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
 
         const response = await fetch(
-          `https://161.132.54.35:3000/api/candidates/${formData.dni}`,
+          `http://161.132.54.35:3000/api/candidates/${formData.dni}`,
           {
             method: "PUT",
             headers: {
@@ -156,12 +156,12 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
           prev.map((c) =>
             c.dni === data.dni
               ? {
-                  ...c,
-                  politicalParty: data.politicalParty,
-                  description: data.description,
-                  imageUri: data.imageUri,
-                  nombre: data.nombre,
-                }
+                ...c,
+                politicalParty: data.politicalParty,
+                description: data.description,
+                imageUri: data.imageUri,
+                nombre: data.nombre,
+              }
               : c
           )
         );
@@ -201,7 +201,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
           requestBody.name = formData.nombre;
         }
 
-        const response = await fetch("https://161.132.54.35:3000/api/candidates", {
+        const response = await fetch("http://161.132.54.35:3000/api/candidates", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -227,7 +227,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
       console.error("Error al guardar candidato:", error);
       toast.error(
         error.message ||
-          "Error al guardar el candidato. Por favor, intenta de nuevo."
+        "Error al guardar el candidato. Por favor, intenta de nuevo."
       );
     } finally {
       setIsLoading(false);
@@ -252,7 +252,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
       const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
 
       const response = await fetch(
-        `https://161.132.54.35:3000/api/candidates/${disablingCandidateId}`,
+        `http://161.132.54.35:3000/api/candidates/${disablingCandidateId}`,
         {
           method: "PUT",
           headers: {
@@ -294,7 +294,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
       console.error("Error al actualizar candidato:", error);
       toast.error(
         error.message ||
-          "Error al actualizar el candidato. Por favor, intenta de nuevo."
+        "Error al actualizar el candidato. Por favor, intenta de nuevo."
       );
     } finally {
       setIsLoading(false);
@@ -315,18 +315,16 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
       className="h-full"
     >
       <Card
-        className={`h-full bg-transparent border shadow-none ${
-          isDisabled ? "border-red-300 opacity-60" : "border-border"
-        }`}
+        className={`h-full bg-transparent border shadow-none ${isDisabled ? "border-red-300 opacity-60" : "border-border"
+          }`}
       >
         <CardHeader>
           <div className="flex items-start gap-4">
             <img
               src={candidate.imageUri}
               alt={candidate.nombre}
-              className={`w-16 h-16 rounded-full object-cover ${
-                isDisabled ? "grayscale" : ""
-              }`}
+              className={`w-16 h-16 rounded-full object-cover ${isDisabled ? "grayscale" : ""
+                }`}
             />
             <div className="flex-1">
               <CardTitle className="text-lg mb-1">{candidate.nombre}</CardTitle>
