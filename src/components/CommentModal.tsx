@@ -28,7 +28,7 @@ export default function CommentModal({ open, onClose }: Props) {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/api/comments", {
+      const response = await fetch("http://161.132.54.35:3000/api/comments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
