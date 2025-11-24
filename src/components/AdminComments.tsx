@@ -17,7 +17,7 @@ export default function AdminComments() {
     const fetchComments = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:8080/api/comments");
+        const response = await fetch("http://161.132.54.35:3000/api/comments");
 
         if (!response.ok) {
           throw new Error("Error al cargar comentarios");

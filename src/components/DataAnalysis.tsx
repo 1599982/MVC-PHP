@@ -215,7 +215,7 @@ export function DataAnalysis() {
   const handleLoadPrediction = async () => {
     setIsLoadingPrediction(true);
     try {
-      const response = await fetch("http://localhost:8080/api/candidates");
+      const response = await fetch("http://161.132.54.35:3000/api/candidates");
       if (!response.ok) throw new Error("Error al cargar candidatos");
       
       const candidates = await response.json();

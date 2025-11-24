@@ -66,7 +66,7 @@ export function VotingSection({
         // Cargar presidentes si es necesario
         if (onlyCategory === undefined || onlyCategory === "presidencia") {
           const presidentResponse = await fetch(
-            "http://localhost:8080/api/candidates/role/PRESIDENT"
+            "http://161.132.54.35:3000/api/candidates/role/PRESIDENT"
           );
           if (presidentResponse.ok) {
             const presidentData = await presidentResponse.json();
@@ -77,7 +77,7 @@ export function VotingSection({
         // Cargar alcaldes si es necesario
         if (onlyCategory === undefined || onlyCategory === "alcaldia") {
           const mayorResponse = await fetch(
-            "http://localhost:8080/api/candidates/role/MAYOR"
+            "http://161.132.54.35:3000/api/candidates/role/MAYOR"
           );
           if (mayorResponse.ok) {
             const mayorData = await mayorResponse.json();
@@ -104,7 +104,7 @@ export function VotingSection({
     if (!selectedCandidate || !userSession?.dni) return;
 
     try {
-      const response = await fetch("http://localhost:8080/api/candidates/vote", {
+      const response = await fetch("http://161.132.54.35:3000/api/candidates/vote", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +133,7 @@ export function VotingSection({
       const roleType = data.roleType;
       if (roleType === "PRESIDENT") {
         const presidentResponse = await fetch(
-          "http://localhost:8080/api/candidates/role/PRESIDENT"
+          "http://161.132.54.35:3000/api/candidates/role/PRESIDENT"
         );
         if (presidentResponse.ok) {
           const presidentData = await presidentResponse.json();
@@ -141,7 +141,7 @@ export function VotingSection({
         }
       } else if (roleType === "MAYOR") {
         const mayorResponse = await fetch(
-          "http://localhost:8080/api/candidates/role/MAYOR"
+          "http://161.132.54.35:3000/api/candidates/role/MAYOR"
         );
         if (mayorResponse.ok) {
           const mayorData = await mayorResponse.json();

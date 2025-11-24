@@ -29,7 +29,7 @@ export function DniModal({ open, onClose }: DniModalProps) {
 
     try {
       // Registrar el votante en la API
-      const response = await fetch('http://localhost:8080/api/persons/register', {
+      const response = await fetch('http://161.132.54.35:3000/api/persons/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

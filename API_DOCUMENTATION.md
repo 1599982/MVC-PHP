@@ -1,6 +1,6 @@
 # API Documentation - Sistema de Votación
 
-Base URL: `http://localhost:8080`
+Base URL: `http://161.132.54.35:3000`
 
 ## Tabla de Contenidos
 - [Person Endpoints](#person-endpoints)

@@ -49,7 +49,7 @@ export function AdminResults() {
 
         // Cargar presidentes
         const presidentResponse = await fetch(
-          "http://localhost:8080/api/candidates/role/PRESIDENT"
+          "http://161.132.54.35:3000/api/candidates/role/PRESIDENT"
         );
         if (presidentResponse.ok) {
           const presidentData = await presidentResponse.json();
@@ -58,7 +58,7 @@ export function AdminResults() {
 
         // Cargar alcaldes
         const mayorResponse = await fetch(
-          "http://localhost:8080/api/candidates/role/MAYOR"
+          "http://161.132.54.35:3000/api/candidates/role/MAYOR"
         );
         if (mayorResponse.ok) {
           const mayorData = await mayorResponse.json();

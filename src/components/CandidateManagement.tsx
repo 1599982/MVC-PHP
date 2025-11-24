@@ -66,7 +66,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
         setLoadingCandidates(true);
         const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
         const response = await fetch(
-          `http://localhost:8080/api/candidates/role/${roleType}`
+          `http://161.132.54.35:3000/api/candidates/role/${roleType}`
         );
 
         if (!response.ok) {
@@ -125,7 +125,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
         const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
 
         const response = await fetch(
-          `http://localhost:8080/api/candidates/${formData.dni}`,
+          `http://161.132.54.35:3000/api/candidates/${formData.dni}`,
           {
             method: "PUT",
             headers: {
@@ -169,7 +169,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
         // Agregar nuevo candidato usando la API
         const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
 
-        const response = await fetch("http://localhost:8080/api/candidates", {
+        const response = await fetch("http://161.132.54.35:3000/api/candidates", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -226,7 +226,7 @@ export function CandidateManagement({ category }: CandidateManagementProps) {
       const roleType = category === "presidencia" ? "PRESIDENT" : "MAYOR";
 
       const response = await fetch(
-        `http://localhost:8080/api/candidates/${disablingCandidateId}`,
+        `http://161.132.54.35:3000/api/candidates/${disablingCandidateId}`,
         {
           method: "PUT",
           headers: {

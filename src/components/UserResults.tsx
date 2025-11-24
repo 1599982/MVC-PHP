@@ -44,7 +44,7 @@ export function UserResults() {
 
         // Obtener información de la persona (incluye votos)
         const personResponse = await fetch(
-          "http://localhost:8080/api/persons/register",
+          "http://161.132.54.35:3000/api/persons/register",
           {
             method: "POST",
             headers: {
@@ -62,7 +62,7 @@ export function UserResults() {
 
         // Cargar presidentes
         const presidentResponse = await fetch(
-          "http://localhost:8080/api/candidates/role/PRESIDENT"
+          "http://161.132.54.35:3000/api/candidates/role/PRESIDENT"
         );
         if (presidentResponse.ok) {
           const presidentData = await presidentResponse.json();
@@ -71,7 +71,7 @@ export function UserResults() {
 
         // Cargar alcaldes
         const mayorResponse = await fetch(
-          "http://localhost:8080/api/candidates/role/MAYOR"
+          "http://161.132.54.35:3000/api/candidates/role/MAYOR"
         );
         if (mayorResponse.ok) {
           const mayorData = await mayorResponse.json();
